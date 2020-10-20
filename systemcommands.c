@@ -16,18 +16,18 @@
  * and the related flags.
  * */
 
-int ExecuteExternalCommands(ParallelCommands *cmdList)
+int ExecuteSystemCommands(ParallelCommands *cmdList)
 {
     if (cmdList->numCmds == 1)
     {
         /* Execute a single external command */
-        ExecuteSingleCommand(&cmdList->pCommand[0]);
+        ExecuteSingleSystemCommand(&cmdList->pCommand[0]);
     }
     else if (cmdList->numCmds > 1 && cmdList->isCommandsPiped != 1)
     {
-        /* When we have multiple commands, try to execute each using the ExecuteSingleCommand*/
+        /* When we have multiple commands, try to execute each using the ExecuteSingleSystemCommand*/
         for (int i = 0; i < cmdList->numCmds; i++)
-            ExecuteSingleCommand(&cmdList->pCommand[i]);
+            ExecuteSingleSystemCommand(&cmdList->pCommand[i]);
     }
     else
     {
@@ -42,7 +42,7 @@ int ExecuteExternalCommands(ParallelCommands *cmdList)
  * Based on the flags; either the input or output or both are redirected
  * Also, based on the flags, either the task is executes in the background or foreground.
  * */
-int ExecuteSingleCommand(Command *cmd)
+int ExecuteSingleSystemCommand(Command *cmd)
 {
     pid_t pid;
     int status;

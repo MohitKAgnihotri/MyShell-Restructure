@@ -43,7 +43,7 @@ int LaunchShell(ParallelCommands *commandsToBeExecuted)
     }
 
     /*Seems the command is not implemented as an internal command, Try to execute as an External command */
-    returnVal = ExecuteExternalCommands(commandsToBeExecuted);
+    returnVal = ExecuteSystemCommands(commandsToBeExecuted);
     return returnVal;
 }
 
