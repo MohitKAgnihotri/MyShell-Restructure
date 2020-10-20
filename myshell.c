@@ -4,10 +4,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <pwd.h>
-#include "MyBash.h"
-#include "Utilities.h"
-#include "InternalCommands.h"
-#include "ExternalCommands.h"
+#include "myshell.h"
+#include "helper.h"
+#include "implementedcommands.h"
+#include "systemcommands.h"
 
 
 /* Global Variable : Use to store and execute commands */

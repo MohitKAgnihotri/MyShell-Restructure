@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <pwd.h>
 #include <dirent.h>
-#include "MyBash.h"
-#include "InternalCommands.h"
+#include "myshell.h"
+#include "implementedcommands.h"
 
 
 // Definitions

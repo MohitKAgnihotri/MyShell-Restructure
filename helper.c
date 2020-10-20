@@ -7,8 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <pwd.h>
-#include "Utilities.h"
-#include "MyBash.h"
+#include "helper.h"
+#include "myshell.h"
 
 
 // Function to read a line from command into the buffer

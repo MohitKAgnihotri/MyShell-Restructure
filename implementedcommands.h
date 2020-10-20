@@ -2,7 +2,7 @@
 // Created by 310165137 on 04/10/2020.
 //
 
-#include "Utilities.h"
+#include "helper.h"
 #ifndef MYSHELL_INTERNALCOMMANDS_H
 #define MYSHELL_INTERNALCOMMANDS_H
 
