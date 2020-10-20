@@ -16,7 +16,7 @@
  * and the related flags.
  * */
 
-int ExecuteExternalCommands(CommandList *cmdList)
+int ExecuteExternalCommands(ParallelCommands *cmdList)
 {
     if (cmdList->numCmds == 1)
     {
@@ -117,7 +117,7 @@ int ExecuteSingleCommand(Command *cmd)
 /*
  * This function is used to execute multiple commands which are piped together.
  * */
-int ExecuteMultipleCommandWithPipe(CommandList *cmdList)
+int ExecuteMultipleCommandWithPipe(ParallelCommands *cmdList)
 {
         size_t i, n;
         int prev_pipe, pfds[2];

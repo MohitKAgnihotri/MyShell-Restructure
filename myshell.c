@@ -11,40 +11,40 @@
 
 
 /* Global Variable : Use to store and execute commands */
-CommandList myCommands;
+ParallelCommands commandsToBeExecuted;
 
 // Function to execute command from terminal
-int ExecuteMyShell(CommandList *cmdList)
+int LaunchShell(ParallelCommands *commandsToBeExecuted)
 {
     /*Error Handling*/
-    if (cmdList == NULL)
+    if (commandsToBeExecuted == NULL)
     {
         PrintErrorMessage();
         return FAILURE;
     }
 
-    int ret;
+    int returnVal;
     /*If it's a single command, then first try to execute as Internal command*/
-    if (cmdList->numCmds == 1)
+    if (commandsToBeExecuted->numCmds == 1)
     {
         /*Check for the valid commands */
-        if (cmdList->pCommand[0].args[0] == NULL)
+        if (commandsToBeExecuted->pCommand[0].args[0] == NULL)
         {
             PrintErrorMessage();
             return 1;
         }
 
         /* Execute the internal command*/
-        ret = ExecuteInternalCommands(&cmdList->pCommand[0]);
-        if (ret != CMD_NOT_FOUND)
+        returnVal = ExecuteInternalCommands(&commandsToBeExecuted->pCommand[0]);
+        if (returnVal != CMD_NOT_FOUND)
         {
-            return ret;
+            return returnVal;
         }
     }
 
     /*Seems the command is not implemented as an internal command, Try to execute as an External command */
-    ret = ExecuteExternalCommands(cmdList);
-    return ret;
+    returnVal = ExecuteExternalCommands(commandsToBeExecuted);
+    return returnVal;
 }
 
 /*
@@ -66,9 +66,9 @@ void getHostname(char *hostname, int size) {
 /*
  * Function to get the current working dir
  * */
-int getCurWorkDir(char *curPath, int size) {
-    curPath = getcwd(curPath, size);
-    if (curPath == NULL)
+int getCurWorkDir(char *path, int size) {
+    path = getcwd(path, size);
+    if (path == NULL)
         return FAILURE;
     else return SUCCESS;
 }
@@ -76,17 +76,17 @@ int getCurWorkDir(char *curPath, int size) {
 /*
  * The function is used to print the shell prompt
  * */
-void PrintPrompt()
+void setPromptUser()
 {
-    char userName[64] = {0};
+    char username[64] = {0};
     char hostname[64] = {0};
-    char currentPath[64] = {0};
+    char path[64] = {0};
 
-    getUsername(userName, 64); //Current user name
+    getUsername(username, 64); //Current user name
     getHostname(hostname, 64); // Host name
-    getCurWorkDir(currentPath, 64); // Current Working  Dir
+    getCurWorkDir(path, 64); // Current Working  Dir
 
-    printf("%s@%s:%s$ ", userName, hostname,currentPath);
+    printf("%s@%s:%s$ ", username, hostname, path);
     printf("%s>", SHELL_PROMPT);
 }
 
@@ -96,68 +96,69 @@ void PrintPrompt()
 
 void InteractiveMode()
 {
-    int isValidRead = 0;
+    int readValidLine = 0;
     while (1)
     {
-        PrintPrompt();
-        memset(&myCommands,0x00, sizeof(myCommands));
+        setPromptUser();
+        memset(&commandsToBeExecuted, 0x00, sizeof(commandsToBeExecuted));
 
         /*Get the user Input from the Stdin*/
-        char *command = ReadCommandLine(&isValidRead, stdin);
-        if (command == NULL || isValidRead == -1)
+        char *commandInput = ReadCommandLine(&readValidLine, stdin);
+        if (commandInput == NULL || readValidLine == -1)
         {
             PrintErrorMessage();
             continue;
         }
 
-        /*Parse the command into individual tokens*/
-        char **cmdArgs = ParseCommand(command);
-        if (*cmdArgs == NULL)
+        /*Parse the commandInput into individual tokens*/
+        char **tokenizedCommands = ParseCommand(commandInput);
+        if (*tokenizedCommands == NULL)
         {
             PrintErrorMessage();
+            free(commandInput);
             continue;
         }
 
         /*Split a long list of token into multiple parallel commands */
-        SplitParallelCommands(cmdArgs, &myCommands);
+        CreateParallelCommands(tokenizedCommands, &commandsToBeExecuted);
 
-        /*Structure the parallel commands into command structure */
-        StructurePassedCommands(&myCommands);
+        /*Structure the parallel commands into commandInput structure */
+        ExtractCommandInformation(&commandsToBeExecuted);
 
         /*Execute the commands*/
-        ExecuteMyShell(&myCommands);
+        LaunchShell(&commandsToBeExecuted);
 
         /*Free memory allocated during the process of parsing and execution */
-        free(cmdArgs);
-        FreeCommandList(&myCommands);
-        free(command);
+        free(tokenizedCommands);
+        FreeCommandList(&commandsToBeExecuted);
+        free(commandInput);
     }
 }
 
 void BatchMode(char *filename)
 {
     printf("Batch mode started \n");
-    FILE * fInput = fopen(filename, "r");
-    int isValidRead = 0;
+    FILE * commandfile = fopen(filename, "r");
+    int readValidLine = 0;
 
-    if (fInput == NULL)
+    if (commandfile == NULL)
     {
         PrintErrorMessage();
         return;
     }
-    while (isValidRead != -1)
+    while (readValidLine != -1)
     {
-        memset(&myCommands,0x00, sizeof(myCommands));
+        memset(&commandsToBeExecuted, 0x00, sizeof(commandsToBeExecuted));
 
         /*Get the user Input from the file*/
-        char *command = ReadCommandLine(&isValidRead, fInput);
+        char *command = ReadCommandLine(&readValidLine, commandfile);
         if (command == NULL)
         {
             PrintErrorMessage();
             continue;
         }
 
-        if (isValidRead == -1)
+        if (readValidLine == -1)
         {
             free(command);
             continue;
@@ -168,26 +169,27 @@ void BatchMode(char *filename)
         if (*cmdArgs == NULL)
         {
             PrintErrorMessage();
+            free(command);
             continue;
         }
 
         /*Split a long list of token into multiple parallel commands */
-        SplitParallelCommands(cmdArgs, &myCommands);
+        CreateParallelCommands(cmdArgs, &commandsToBeExecuted);
 
         /*Structure the parallel commands into command structure */
-        StructurePassedCommands(&myCommands);
+        ExtractCommandInformation(&commandsToBeExecuted);
 
         /*Execute the commands*/
-        ExecuteMyShell(&myCommands);
+        LaunchShell(&commandsToBeExecuted);
 
         /*Free memory allocated during the process of parsing and execution */
         free(cmdArgs);
-        FreeCommandList(&myCommands);
+        FreeCommandList(&commandsToBeExecuted);
         free(command);
 
     }
     /*Close the file once we are done processing all the commands*/
-    fclose(fInput);
+    fclose(commandfile);
 }
 
 int main(int argc, char **argv)

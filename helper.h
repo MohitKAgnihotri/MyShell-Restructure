@@ -27,16 +27,16 @@ typedef struct CommandList
     int numCmds;
     int isCommandsPiped;
     Command pCommand[MAX_NUM_PARALLEL_COMMANDS];
-}CommandList;
+}ParallelCommands;
 
 
 
 char *ReadCommandLine( int *isvalid, FILE* inputStream );
 char** ParseCommand(char *line);
-void StructurePassedCommands(CommandList *cmdList);
+void ExtractCommandInformation(ParallelCommands *cmdList);
 void get_fullpath(char *fullpath, const char *shortpath);
-void SplitParallelCommands(char**args, CommandList *cmdList);
+void CreateParallelCommands(char**args, ParallelCommands *cmdList);
 void PrintErrorMessage(void);
-void FreeCommandList(CommandList *cmdList);
+void FreeCommandList(ParallelCommands *cmdList);
 
 #endif //MYSHELL_UTILITIES_H

@@ -38,7 +38,7 @@ char *ReadCommandLine( int *isvalid, FILE* inputStream )
  *  CMD2: cat test.txt
  *  CMD3: wc -l
  * */
-void SplitParallelCommands(char**args, CommandList *cmdList)
+void CreateParallelCommands(char**args, ParallelCommands *cmdList)
 {
     if (args == NULL || *args == NULL || cmdList == NULL)
     {
@@ -116,7 +116,7 @@ char** ParseCommand(char *line)
  * This function parses individual command and extracts information required for the execution of the commands
  * */
 
-void StructurePassedCommands(CommandList *cmdList)
+void ExtractCommandInformation(ParallelCommands *cmdList)
 {
     if (cmdList == NULL)
     {
@@ -260,7 +260,7 @@ void PrintErrorMessage(void)
     write(STDERR_FILENO, error_message, strlen(error_message));
 }
 
-void FreeCommandList(CommandList *cmdList)
+void FreeCommandList(ParallelCommands *cmdList)
 {
     for (int i = 0; i < MAX_NUM_PARALLEL_COMMANDS; i++)
     {

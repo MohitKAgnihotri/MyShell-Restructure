@@ -5,9 +5,9 @@
 #ifndef MYSHELL_EXTERNALCOMMANDS_H
 #define MYSHELL_EXTERNALCOMMANDS_H
 
-int ExecuteExternalCommands(CommandList *cmdList);
+int ExecuteExternalCommands(ParallelCommands *cmdList);
 int ExecuteSingleCommand(Command *cmd);
-int ExecuteMultipleCommandWithoutWait(CommandList *cmdList);
-int ExecuteMultipleCommandWithPipe(CommandList *cmdList);
+int ExecuteMultipleCommandWithoutWait(ParallelCommands *cmdList);
+int ExecuteMultipleCommandWithPipe(ParallelCommands *cmdList);
 
 #endif //MYSHELL_EXTERNALCOMMANDS_H
