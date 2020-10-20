@@ -1,9 +1,5 @@
-//
-// Created by 310165137 on 03/10/2020.
-//
-
-#ifndef MYSHELL_MYBASH_H
-#define MYSHELL_MYBASH_H
+#ifndef MYSHELL_H
+#define MYSHELL_H
 
 #define SUCCESS 0
 #define FAILURE 1
@@ -17,4 +13,4 @@
 
 #define MAX_BUFFER 1024
 
-#endif //MYSHELL_MYBASH_H
+#endif //MYSHELL_H

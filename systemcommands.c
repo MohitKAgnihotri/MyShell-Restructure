@@ -58,7 +58,7 @@ int ExecuteSingleCommand(Command *cmd)
     if (cmd->isOutputRedirected)
     {
         /*Find the full path name for the file where output is redirected*/
-        get_fullpath(max_file_path, cmd->outFileName);
+        derivefullpath(max_file_path, cmd->outFileName);
         /* Reopen the stdout as a filename */
         outFileFp=freopen(max_file_path, cmd->isOutputTruncated ==  1 ? "w": "a",stdout);
     }
@@ -73,7 +73,7 @@ int ExecuteSingleCommand(Command *cmd)
         /*Check if  the inout is reqirected, if yes, open the stdin as filename*/
         if (cmd->isInputRedirected)
         {
-            get_fullpath(max_file_path,cmd->inFileName);
+            derivefullpath(max_file_path, cmd->inFileName);
             inFileFp= freopen(max_file_path,"r",stdin); // open file
         }
         /*Finally execute  the command using the arguments using the args*/

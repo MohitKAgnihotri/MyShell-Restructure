@@ -34,7 +34,7 @@ typedef struct CommandList
 char *ReadCommandLine( int *isvalid, FILE* inputStream );
 char** ParseCommand(char *line);
 void ExtractCommandInformation(ParallelCommands *cmdList);
-void get_fullpath(char *fullpath, const char *shortpath);
+void derivefullpath(char *fullpath, const char *shortpath);
 void CreateParallelCommands(char**args, ParallelCommands *cmdList);
 void PrintErrorMessage(void);
 void FreeCommandList(ParallelCommands *cmdList);

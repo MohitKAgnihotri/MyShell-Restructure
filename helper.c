@@ -209,7 +209,7 @@ void ExtractCommandInformation(ParallelCommands *cmdList)
     }
 }
 
-void get_fullpath(char *fullpath,const char *shortpath)
+void derivefullpath(char *fullpath, const char *shortpath)
 {
     int i,j;
     i=j=0;

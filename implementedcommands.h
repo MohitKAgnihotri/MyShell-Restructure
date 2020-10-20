@@ -12,21 +12,21 @@ typedef struct
 {
     char *cmd;
     Handler_t handler;
-} Command_t;
+} implemented_command_list;
 
 
-int Internal_Handler_CD (Command *cmd);
-int Internal_Handler_CLR (Command *cmd);
-int Internal_Handler_DIR (Command *cmd);
-int Internal_Handler_ENVIORN (Command *cmd);
-int Internal_Handler_ECHO (Command *cmd);
-int Internal_Handler_HELP (Command *cmd);
-int Internal_Handler_PAUSE (Command *cmd);
-int Internal_Handler_QUIT (Command *cmd);
-int Internal_Handler_PATH (Command *cmd);
+int CD (Command *cmd);
+int CLR (Command *cmd);
+int DIRECTORY (Command *cmd);
+int ENVIRON (Command *cmd);
+int ECHO (Command *cmd);
+int HELP (Command *cmd);
+int PAUSE (Command *cmd);
+int QUIT (Command *cmd);
+int PATH (Command *cmd);
 
-int numInternalCommandsSupported();
-int ExecuteInternalCommands(Command *cmd);
+int numImplementedCommands();
+int ExecImplementedCmd(Command *cmd);
 
 
 

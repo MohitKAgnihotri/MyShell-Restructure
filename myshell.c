@@ -35,7 +35,7 @@ int LaunchShell(ParallelCommands *commandsToBeExecuted)
         }
 
         /* Execute the internal command*/
-        returnVal = ExecuteInternalCommands(&commandsToBeExecuted->pCommand[0]);
+        returnVal = ExecImplementedCmd(&commandsToBeExecuted->pCommand[0]);
         if (returnVal != CMD_NOT_FOUND)
         {
             return returnVal;
