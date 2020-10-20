@@ -25,10 +25,10 @@ int LaunchShell(ParallelCommands *commandsToBeExecuted)
 
     int returnVal;
     /*If it's a single command, then first try to execute as Internal command*/
-    if (commandsToBeExecuted->numCmds == 1)
+    if (commandsToBeExecuted->numParallelCommands == 1)
     {
         /*Check for the valid commands */
-        if (commandsToBeExecuted->pCommand[0].args[0] == NULL)
+        if (commandsToBeExecuted->pCommand[0].tokenizedCommands[0] == NULL)
         {
             PrintErrorMessage();
             return 1;

@@ -18,15 +18,15 @@
 
 int ExecuteSystemCommands(ParallelCommands *cmdList)
 {
-    if (cmdList->numCmds == 1)
+    if (cmdList->numParallelCommands == 1)
     {
         /* Execute a single external command */
         ExecuteSingleSystemCommand(&cmdList->pCommand[0]);
     }
-    else if (cmdList->numCmds > 1 && cmdList->isCommandsPiped != 1)
+    else if (cmdList->numParallelCommands > 1 && cmdList->isCommandsPiped != 1)
     {
         /* When we have multiple commands, try to execute each using the ExecuteSingleSystemCommand*/
-        for (int i = 0; i < cmdList->numCmds; i++)
+        for (int i = 0; i < cmdList->numParallelCommands; i++)
             ExecuteSingleSystemCommand(&cmdList->pCommand[i]);
     }
     else
@@ -58,7 +58,7 @@ int ExecuteSingleSystemCommand(Command *cmd)
     if (cmd->isOutputRedirected)
     {
         /*Find the full path name for the file where output is redirected*/
-        derivefullpath(max_file_path, cmd->outFileName);
+        derivefullpath(max_file_path, cmd->redirectedOutput);
         /* Reopen the stdout as a filename */
         outFileFp=freopen(max_file_path, cmd->isOutputTruncated ==  1 ? "w": "a",stdout);
     }
@@ -68,16 +68,16 @@ int ExecuteSingleSystemCommand(Command *cmd)
         // The Child Process
         // Set the enviornment for the child process
         putenv( parent);
-        printf("%s, %s", cmd->args[0], cmd->args[1]);
+        printf("%s, %s", cmd->tokenizedCommands[0], cmd->tokenizedCommands[1]);
 
         /*Check if  the inout is reqirected, if yes, open the stdin as filename*/
         if (cmd->isInputRedirected)
         {
-            derivefullpath(max_file_path, cmd->inFileName);
+            derivefullpath(max_file_path, cmd->redirectedInput);
             inFileFp= freopen(max_file_path,"r",stdin); // open file
         }
-        /*Finally execute  the command using the arguments using the args*/
-        if (execvp(cmd->args[0], cmd->args) == -1)
+        /*Finally execute  the command using the arguments using the tokenizedCommands*/
+        if (execvp(cmd->tokenizedCommands[0], cmd->tokenizedCommands) == -1)
         {
             PrintErrorMessage();
             exit(EXIT_FAILURE);
@@ -121,7 +121,7 @@ int ExecuteMultipleCommandWithPipe(ParallelCommands *cmdList)
 {
         size_t i, n;
         int prev_pipe, pfds[2];
-        n = cmdList->numCmds;
+        n = cmdList->numParallelCommands;
         prev_pipe = STDIN_FILENO;
 
         for (i = 0; i < n - 1; i++)
@@ -140,7 +140,7 @@ int ExecuteMultipleCommandWithPipe(ParallelCommands *cmdList)
                 close(pfds[1]);
 
                 // Start command
-                execvp(cmdList->pCommand[i].args[0], cmdList->pCommand[i].args);
+                execvp(cmdList->pCommand[i].tokenizedCommands[0], cmdList->pCommand[i].tokenizedCommands);
                 PrintErrorMessage();
                 exit(1);
             }
@@ -160,7 +160,7 @@ int ExecuteMultipleCommandWithPipe(ParallelCommands *cmdList)
         }
 
         // Start last command
-        execvp(cmdList->pCommand[i].args[0], cmdList->pCommand[i].args);
+        execvp(cmdList->pCommand[i].tokenizedCommands[0], cmdList->pCommand[i].tokenizedCommands);
         PrintErrorMessage();
         exit(1);
 }

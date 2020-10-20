@@ -36,7 +36,7 @@ int ExecImplementedCmd(Command *cmd)
     // Loop to check for builtin functions
     for (int i=0; ((i < numImplementedCommands()) && (implemented_commands[i].cmd != NULL)); i++) // numBuiltin() returns the number of builtin functions
     {
-        if(strcmp(cmd->args[0], implemented_commands[i].cmd) == 0) // Check if user function matches builtin function name
+        if(strcmp(cmd->tokenizedCommands[0], implemented_commands[i].cmd) == 0) // Check if user function matches builtin function name
             return (implemented_commands[i].handler)(cmd); // Call respective builtin function with arguments
     }
     return CMD_NOT_FOUND;
@@ -54,7 +54,7 @@ int ArgsCount(char *const *args)
 
 int CD (Command *cmd)
 {
-    int numArgs = ArgsCount(cmd->args);
+    int numArgs = ArgsCount(cmd->tokenizedCommands);
 
     if (numArgs == 0)
     {
@@ -68,7 +68,7 @@ int CD (Command *cmd)
         return TOO_MANY_PARAMETERS;
     }
 
-    int ret = chdir(cmd->args[numArgs]);
+    int ret = chdir(cmd->tokenizedCommands[numArgs]);
     if (ret)
     {
         PrintErrorMessage();
@@ -83,7 +83,7 @@ int CLR (Command *cmd)
     pid = fork();
     if (pid == 0)
     {
-        execvp("clear", cmd->args);
+        execvp("clear", cmd->tokenizedCommands);
         PrintErrorMessage();
     }
     sleep(1);
@@ -93,14 +93,14 @@ int CLR (Command *cmd)
 int DIRECTORY (Command *cmd)
 {
     FILE * fp=NULL;
-    int numArgs = ArgsCount(cmd->args);
+    int numArgs = ArgsCount(cmd->tokenizedCommands);
 
     struct dirent *parentDir;  // Pointer for directory entry
 
     if (cmd->isOutputRedirected)
     {
         char filePath[100] = {0};
-        derivefullpath(filePath, cmd->outFileName);
+        derivefullpath(filePath, cmd->redirectedOutput);
         fp=freopen(filePath, cmd->isOutputTruncated == 1 ? "w" : "a", stdout);
     }
 
@@ -112,7 +112,7 @@ int DIRECTORY (Command *cmd)
     }
     else
     {
-        dir = opendir(cmd->args[numArgs]);
+        dir = opendir(cmd->tokenizedCommands[numArgs]);
     }
 
     if (dir == NULL)  // opendir returns NULL if couldn't open directory
@@ -143,7 +143,7 @@ int ENVIRON (Command *cmd)
     if (cmd->isOutputRedirected)
     {
         char filePath[100] = {0};
-        derivefullpath(filePath, cmd->outFileName);
+        derivefullpath(filePath, cmd->redirectedOutput);
         fp=freopen(filePath, cmd->isOutputTruncated == 1 ? "w" : "a", stdout);
     }
 
@@ -166,13 +166,13 @@ int ECHO (Command *cmd)
     if (cmd->isOutputRedirected)
     {
         char filepath[100] = {0};
-        derivefullpath(filepath, cmd->outFileName);
+        derivefullpath(filepath, cmd->redirectedOutput);
         fp=freopen(filepath, cmd->isOutputTruncated == 1 ? "w" : "a", stdout);
     }
 
-    for (numArgs = 1; ((numArgs < MAX_NUM_OF_ARGUMENTS) && (cmd->args[numArgs] != NULL)); numArgs++)
+    for (numArgs = 1; ((numArgs < MAX_NUM_OF_ARGUMENTS) && (cmd->tokenizedCommands[numArgs] != NULL)); numArgs++)
     {
-        printf("%s \t",cmd->args[numArgs]);
+        printf("%s \t",cmd->tokenizedCommands[numArgs]);
     }
     printf("\n");
 
@@ -189,7 +189,7 @@ int HELP (Command *cmd)
     if (cmd->isOutputRedirected)
     {
         char filePath[100] = {0};
-        derivefullpath(filePath, cmd->outFileName);
+        derivefullpath(filePath, cmd->redirectedOutput);
         fp=freopen(filePath, cmd->isOutputTruncated == 1 ? "w" : "a", stdout);
     }
 
@@ -224,10 +224,10 @@ int QUIT (Command *cmd)
 int PATH (Command *cmd)
 {
     char modifiedPath[MAX_NUM_OF_ARGUMENTS * MAX_ARG_LENGTH] = {0};
-    int num_of_args = ArgsCount(cmd->args);
+    int num_of_args = ArgsCount(cmd->tokenizedCommands);
     while (num_of_args > 0)
     {
-        strcat(modifiedPath, cmd->args[num_of_args]);
+        strcat(modifiedPath, cmd->tokenizedCommands[num_of_args]);
         strcat(modifiedPath, ":");
         num_of_args--;
     }

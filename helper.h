@@ -13,9 +13,9 @@
 
 typedef struct Command
 {
-    char** args;
-    char* inFileName;
-    char* outFileName;
+    char** tokenizedCommands;
+    char* redirectedInput;
+    char* redirectedOutput;
     int isInputRedirected;
     int isOutputRedirected;
     int isOutputTruncated;
@@ -24,7 +24,7 @@ typedef struct Command
 
 typedef struct CommandList
 {
-    int numCmds;
+    int numParallelCommands;
     int isCommandsPiped;
     Command pCommand[MAX_NUM_PARALLEL_COMMANDS];
 }ParallelCommands;

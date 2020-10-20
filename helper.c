@@ -54,21 +54,21 @@ void CreateParallelCommands(char**args, ParallelCommands *cmdList)
     for (index = 0; index < MAX_NUM_OF_ARGUMENTS && args[index] != NULL; index++)
     {
         /*Start processing of the first command*/
-        if (cmdList->pCommand[cmdCnt].args == NULL)
+        if (cmdList->pCommand[cmdCnt].tokenizedCommands == NULL)
         {
-            cmdList->pCommand[cmdCnt].args = (char **)malloc(sizeof(char *) * MAX_NUM_OF_ARGUMENTS);
-            memset(cmdList->pCommand[cmdCnt].args, 0x00, sizeof(char *) * MAX_NUM_OF_ARGUMENTS);
+            cmdList->pCommand[cmdCnt].tokenizedCommands = (char **)malloc(sizeof(char *) * MAX_NUM_OF_ARGUMENTS);
+            memset(cmdList->pCommand[cmdCnt].tokenizedCommands, 0x00, sizeof(char *) * MAX_NUM_OF_ARGUMENTS);
             argumentCnt = 0;
         }
         /* Check if the end of the command is not reached */
         if ((strcmp(args[index], "&") != 0 &&  strcmp(args[index], "|") != 0) || (strcmp(args[index], "&") == 0 &&  args[index+1] == NULL))
         {
-            cmdList->pCommand[cmdCnt].args[argumentCnt] = args[index];
+            cmdList->pCommand[cmdCnt].tokenizedCommands[argumentCnt] = args[index];
             argumentCnt++;
         }
         else /*Command has ended. Need to Update the command count and also check if the commands are piped. */
         {
-            cmdList->pCommand[cmdCnt].args[argumentCnt] = NULL;
+            cmdList->pCommand[cmdCnt].tokenizedCommands[argumentCnt] = NULL;
             if (strcmp(args[index], "|") == 0)
             {
                 cmdList->isCommandsPiped = 1;
@@ -77,7 +77,7 @@ void CreateParallelCommands(char**args, ParallelCommands *cmdList)
         }
     }
     /* Finally update the data structure  with the number of processed commands*/
-    cmdList->numCmds = cmdCnt+1;
+    cmdList->numParallelCommands = cmdCnt + 1;
 }
 
 /* This function takes in the commandline read from a stream, and then tokenizes it.
@@ -128,20 +128,20 @@ void ExtractCommandInformation(ParallelCommands *cmdList)
     for (int j = 0; j < MAX_NUM_PARALLEL_COMMANDS; j++)
     {
         Command *cmd = &cmdList->pCommand[j];
-        if (cmd->args == NULL )
+        if (cmd->tokenizedCommands == NULL )
         {
             return;
         }
 
         /*Verify the correctness of the command
          * command > ; or command >> ; or command < ; or command | ; are few example of malformed commands*/
-        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->args[i] != NULL; i++)
+        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->tokenizedCommands[i] != NULL; i++)
         {
-            if (strcmp(cmd->args[i], "<") ==0 || strcmp(cmd->args[i], ">") == 0 \
-                || strcmp(cmd->args[i], ">>") == 0|| strcmp(cmd->args[i], "|") ==0)
+            if (strcmp(cmd->tokenizedCommands[i], "<") == 0 || strcmp(cmd->tokenizedCommands[i], ">") == 0 \
+ || strcmp(cmd->tokenizedCommands[i], ">>") == 0 || strcmp(cmd->tokenizedCommands[i], "|") == 0)
             {
-                if ((cmd->args[i+1] == NULL) || (strcmp(cmd->args[i+1], "<") == 0|| strcmp(cmd->args[i+1], ">") == 0 \
-                        || strcmp(cmd->args[i+1], ">>") == 0|| strcmp(cmd->args[i+1], "|") ==0))
+                if ((cmd->tokenizedCommands[i + 1] == NULL) || (strcmp(cmd->tokenizedCommands[i + 1], "<") == 0 || strcmp(cmd->tokenizedCommands[i + 1], ">") == 0 \
+ || strcmp(cmd->tokenizedCommands[i + 1], ">>") == 0 || strcmp(cmd->tokenizedCommands[i + 1], "|") == 0))
                 {
                     PrintErrorMessage();
                     return;
@@ -150,23 +150,23 @@ void ExtractCommandInformation(ParallelCommands *cmdList)
         }
 
         /*Get the filename if the input is redirected */
-        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->args[i] != NULL; i++)
+        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->tokenizedCommands[i] != NULL; i++)
         {
-            if (strcmp(cmd->args[i], "<") == 0 && cmd->args[i+1] != NULL )
+            if (strcmp(cmd->tokenizedCommands[i], "<") == 0 && cmd->tokenizedCommands[i + 1] != NULL )
             {
-                cmd->inFileName = cmd->args[i+1];
+                cmd->redirectedInput = cmd->tokenizedCommands[i + 1];
                 cmd->isInputRedirected = 1;
             }
         }
 
         /*Get the filename if the output is redirected */
-        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->args[i] != NULL; i++)
+        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->tokenizedCommands[i] != NULL; i++)
         {
-            if (((strcmp(cmd->args[i], ">") == 0) || (strcmp(cmd->args[i], ">>") == 0)) && (cmd->args[i+1] != NULL ))
+            if (((strcmp(cmd->tokenizedCommands[i], ">") == 0) || (strcmp(cmd->tokenizedCommands[i], ">>") == 0)) && (cmd->tokenizedCommands[i + 1] != NULL ))
             {
-                cmd->outFileName = cmd->args[i+1];
+                cmd->redirectedOutput = cmd->tokenizedCommands[i + 1];
                 cmd->isOutputRedirected = 1;
-                if (strcmp(cmd->args[i], ">>") == 0)
+                if (strcmp(cmd->tokenizedCommands[i], ">>") == 0)
                 {
                     /*See if the output file must be truncated or not*/
                     cmd->isOutputTruncated = 1;
@@ -175,18 +175,18 @@ void ExtractCommandInformation(ParallelCommands *cmdList)
         }
 
         //Check if the pipe is used
-        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->args[i] != NULL; i++)
+        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->tokenizedCommands[i] != NULL; i++)
         {
-            if (((strcmp(cmd->args[i], "|") == 0)) && (cmd->args[i+1] != NULL ))
+            if (((strcmp(cmd->tokenizedCommands[i], "|") == 0)) && (cmd->tokenizedCommands[i + 1] != NULL ))
             {
                 cmdList->isCommandsPiped = 1;
             }
         }
 
         //Check if the command is to be run in background
-        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->args[i] != NULL; i++)
+        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->tokenizedCommands[i] != NULL; i++)
         {
-            if (strcmp(cmd->args[i], "&") == 0)
+            if (strcmp(cmd->tokenizedCommands[i], "&") == 0)
             {
                 cmd->isExecuteInBackgrnd = 1;
             }
@@ -194,14 +194,14 @@ void ExtractCommandInformation(ParallelCommands *cmdList)
 
         /*Reset the extra arguments once parsing is comlete as the infirmation is populated
          * in the command structure. */
-        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->args[i] != NULL; i++)
+        for (int i = 0; i < MAX_NUM_OF_ARGUMENTS && cmd->tokenizedCommands[i] != NULL; i++)
         {
-            if(strcmp(cmd->args[i], "<") ==0 || strcmp(cmd->args[i], ">") == 0 \
-                || strcmp(cmd->args[i], ">>") == 0|| strcmp(cmd->args[i], "|") == 0 ||  strcmp(cmd->args[i], "&") == 0)
+            if(strcmp(cmd->tokenizedCommands[i], "<") == 0 || strcmp(cmd->tokenizedCommands[i], ">") == 0 \
+ || strcmp(cmd->tokenizedCommands[i], ">>") == 0 || strcmp(cmd->tokenizedCommands[i], "|") == 0 || strcmp(cmd->tokenizedCommands[i], "&") == 0)
             {
                 for (int k = i; k < MAX_NUM_OF_ARGUMENTS; k++)
                 {
-                    cmd->args[k] = NULL;
+                    cmd->tokenizedCommands[k] = NULL;
                 }
                 break;
             }
@@ -267,7 +267,7 @@ void FreeCommandList(ParallelCommands *cmdList)
         Command *cmd = &cmdList->pCommand[i];
         if (cmd)
         {
-            free(cmd->args);
+            free(cmd->tokenizedCommands);
         }
     }
 }
