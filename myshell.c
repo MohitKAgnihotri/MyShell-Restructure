@@ -13,6 +13,8 @@
 /* Global Variable : Use to store and execute commands */
 ParallelCommands commandsToBeExecuted;
 
+void ParseExecuteCommand(char *command);
+
 // Function to execute command from terminal
 int LaunchShell(ParallelCommands *commandsToBeExecuted)
 {
@@ -110,28 +112,7 @@ void InteractiveMode()
             continue;
         }
 
-        /*Parse the commandInput into individual tokens*/
-        char **tokenizedCommands = ParseCommand(commandInput);
-        if (*tokenizedCommands == NULL)
-        {
-            PrintErrorMessage();
-            free(commandInput);
-            continue;
-        }
-
-        /*Split a long list of token into multiple parallel commands */
-        CreateParallelCommands(tokenizedCommands, &commandsToBeExecuted);
-
-        /*Structure the parallel commands into commandInput structure */
-        ExtractCommandInformation(&commandsToBeExecuted);
-
-        /*Execute the commands*/
-        LaunchShell(&commandsToBeExecuted);
-
-        /*Free memory allocated during the process of parsing and execution */
-        free(tokenizedCommands);
-        FreeCommandList(&commandsToBeExecuted);
-        free(commandInput);
+        ParseExecuteCommand(commandInput);
     }
 }
 
@@ -164,32 +145,35 @@ void BatchMode(char *filename)
             continue;
         }
 
-        /*Parse the command into individual tokens*/
-        char **cmdArgs = ParseCommand(command);
-        if (*cmdArgs == NULL)
-        {
-            PrintErrorMessage();
-            free(command);
-            continue;
-        }
-
-        /*Split a long list of token into multiple parallel commands */
-        CreateParallelCommands(cmdArgs, &commandsToBeExecuted);
-
-        /*Structure the parallel commands into command structure */
-        ExtractCommandInformation(&commandsToBeExecuted);
-
-        /*Execute the commands*/
-        LaunchShell(&commandsToBeExecuted);
-
-        /*Free memory allocated during the process of parsing and execution */
-        free(cmdArgs);
-        FreeCommandList(&commandsToBeExecuted);
-        free(command);
+        ParseExecuteCommand(command);
 
     }
     /*Close the file once we are done processing all the commands*/
     fclose(commandfile);
+}
+
+void ParseExecuteCommand(char *command) {/*Parse the command into individual tokens*/
+    char **cmdArgs = ParseCommand(command);
+    if (*cmdArgs == NULL)
+    {
+        PrintErrorMessage();
+        free(command);
+        return;
+    }
+
+    /*Split a long list of token into multiple parallel commands */
+    CreateParallelCommands(cmdArgs, &commandsToBeExecuted);
+
+    /*Structure the parallel commands into command structure */
+    ExtractCommandInformation(&commandsToBeExecuted);
+
+    /*Execute the commands*/
+    LaunchShell(&commandsToBeExecuted);
+
+    /*Free memory allocated during the process of parsing and execution */
+    free(cmdArgs);
+    FreeCommandList(&commandsToBeExecuted);
+    free(command);
 }
 
 int main(int argc, char **argv)
@@ -206,8 +190,7 @@ int main(int argc, char **argv)
      * Your initial shell path should contain one directory: `/bin'
      * */
     setenv("PATH",defaultPath,1);// add the current working directory  in the "PATH" environment variable to search for the filename specified.
-
-
+    
     // Parsing commands Interactive mode or Script Mode
     if (argc == 1)
         InteractiveMode();

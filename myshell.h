@@ -12,5 +12,6 @@
 
 
 #define MAX_BUFFER 1024
+void ParseNExecuteCommands(const char *command);
 
 #endif //MYSHELL_H
