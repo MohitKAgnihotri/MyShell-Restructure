@@ -7,11 +7,11 @@
 #define MYSHELL_INTERNALCOMMANDS_H
 
 
-typedef int (*Handler_t) (Command *cmd);
+typedef int (*funcPtr) (Command *cmd);
 typedef struct
 {
     char *cmd;
-    Handler_t handler;
+    funcPtr pfunc;
 } implemented_command_list;
 
 

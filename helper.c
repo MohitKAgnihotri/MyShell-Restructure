@@ -42,7 +42,7 @@ void CreateParallelCommands(char**args, ParallelCommands *cmdList)
 {
     if (args == NULL || *args == NULL || cmdList == NULL)
     {
-        PrintErrorMessage();
+        errorMessage();
         return;
     }
 
@@ -90,7 +90,7 @@ char** ParseCommand(char *line)
     memset(argumentList,0x00, sizeof(char *) * MAX_NUM_OF_ARGUMENTS);
     if (argumentList == NULL)
     {
-        PrintErrorMessage();
+        errorMessage();
         return NULL;
     }
 
@@ -120,7 +120,7 @@ void ExtractCommandInformation(ParallelCommands *cmdList)
 {
     if (cmdList == NULL)
     {
-        PrintErrorMessage();
+        errorMessage();
         return;
     }
 
@@ -143,7 +143,7 @@ void ExtractCommandInformation(ParallelCommands *cmdList)
                 if ((cmd->tokenizedCommands[i + 1] == NULL) || (strcmp(cmd->tokenizedCommands[i + 1], "<") == 0 || strcmp(cmd->tokenizedCommands[i + 1], ">") == 0 \
  || strcmp(cmd->tokenizedCommands[i + 1], ">>") == 0 || strcmp(cmd->tokenizedCommands[i + 1], "|") == 0))
                 {
-                    PrintErrorMessage();
+                    errorMessage();
                     return;
                 }
             }
@@ -254,7 +254,7 @@ void derivefullpath(char *fullpath, const char *shortpath)
     strcat(fullpath+j,shortpath+i);
 }
 
-void PrintErrorMessage(void)
+void errorMessage(void)
 {
     char error_message[30] = "An error has occurred\n";
     write(STDERR_FILENO, error_message, strlen(error_message));
@@ -272,3 +272,28 @@ void FreeCommandList(ParallelCommands *cmdList)
     }
 }
 
+/*
+ * Function to get the current user name
+ * */
+void getUsername(char*username, int size) {
+    struct passwd* pwd = getpwuid(getuid());
+    strncpy(username, pwd->pw_name, size);
+}
+
+
+/*
+ * Function to get the current host name
+ * */
+void getHostname(char *hostname, int size) {
+    gethostname(hostname, size);
+}
+
+/*
+ * Function to get the current working dir
+ * */
+int getCurWorkDir(char *path, int size) {
+    path = getcwd(path, size);
+    if (path == NULL)
+        return FAILURE;
+    else return SUCCESS;
+}

@@ -37,7 +37,7 @@ int ExecImplementedCmd(Command *cmd)
     for (int i=0; ((i < numImplementedCommands()) && (implemented_commands[i].cmd != NULL)); i++) // numBuiltin() returns the number of builtin functions
     {
         if(strcmp(cmd->tokenizedCommands[0], implemented_commands[i].cmd) == 0) // Check if user function matches builtin function name
-            return (implemented_commands[i].handler)(cmd); // Call respective builtin function with arguments
+            return (implemented_commands[i].pfunc)(cmd); // Call respective builtin function with arguments
     }
     return CMD_NOT_FOUND;
 }
@@ -58,20 +58,20 @@ int CD (Command *cmd)
 
     if (numArgs == 0)
     {
-        PrintErrorMessage();
+        errorMessage();
         return TOO_FEW_PARAMETERS;
     }
 
     if (numArgs > 1)
     {
-        PrintErrorMessage();
+        errorMessage();
         return TOO_MANY_PARAMETERS;
     }
 
     int ret = chdir(cmd->tokenizedCommands[numArgs]);
     if (ret)
     {
-        PrintErrorMessage();
+        errorMessage();
         return FAILURE;
     }
     return SUCCESS;
@@ -84,7 +84,7 @@ int CLR (Command *cmd)
     if (pid == 0)
     {
         execvp("clear", cmd->tokenizedCommands);
-        PrintErrorMessage();
+        errorMessage();
     }
     sleep(1);
     return EXIT_SUCCESS;
@@ -117,7 +117,7 @@ int DIRECTORY (Command *cmd)
 
     if (dir == NULL)  // opendir returns NULL if couldn't open directory
     {
-        PrintErrorMessage();
+        errorMessage();
         return FAILURE;
     }
 
@@ -198,7 +198,7 @@ int HELP (Command *cmd)
         char * const help[] = { "more", "readme_doc", NULL };
         if (execvp(help[0], help) == -1)
         {
-            PrintErrorMessage();
+            errorMessage();
             exit(EXIT_FAILURE);
         }
     }

@@ -21,7 +21,7 @@ int LaunchShell(ParallelCommands *commandsToBeExecuted)
     /*Error Handling*/
     if (commandsToBeExecuted == NULL)
     {
-        PrintErrorMessage();
+        errorMessage();
         return FAILURE;
     }
 
@@ -32,7 +32,7 @@ int LaunchShell(ParallelCommands *commandsToBeExecuted)
         /*Check for the valid commands */
         if (commandsToBeExecuted->pCommand[0].tokenizedCommands[0] == NULL)
         {
-            PrintErrorMessage();
+            errorMessage();
             return 1;
         }
 
@@ -47,32 +47,6 @@ int LaunchShell(ParallelCommands *commandsToBeExecuted)
     /*Seems the command is not implemented as an internal command, Try to execute as an External command */
     returnVal = ExecuteSystemCommands(commandsToBeExecuted);
     return returnVal;
-}
-
-/*
- * Function to get the current user name
- * */
-void getUsername(char*username, int size) {
-    struct passwd* pwd = getpwuid(getuid());
-    strncpy(username, pwd->pw_name, size);
-}
-
-
-/*
- * Function to get the current host name
- * */
-void getHostname(char *hostname, int size) {
-    gethostname(hostname, size);
-}
-
-/*
- * Function to get the current working dir
- * */
-int getCurWorkDir(char *path, int size) {
-    path = getcwd(path, size);
-    if (path == NULL)
-        return FAILURE;
-    else return SUCCESS;
 }
 
 /*
@@ -108,7 +82,7 @@ void InteractiveMode()
         char *commandInput = ReadCommandLine(&readValidLine, stdin);
         if (commandInput == NULL || readValidLine == -1)
         {
-            PrintErrorMessage();
+            errorMessage();
             continue;
         }
 
@@ -124,7 +98,7 @@ void BatchMode(char *filename)
 
     if (commandfile == NULL)
     {
-        PrintErrorMessage();
+        errorMessage();
         return;
     }
     while (readValidLine != -1)
@@ -135,7 +109,7 @@ void BatchMode(char *filename)
         char *command = ReadCommandLine(&readValidLine, commandfile);
         if (command == NULL)
         {
-            PrintErrorMessage();
+            errorMessage();
             continue;
         }
 
@@ -146,17 +120,18 @@ void BatchMode(char *filename)
         }
 
         ParseExecuteCommand(command);
-
     }
     /*Close the file once we are done processing all the commands*/
     fclose(commandfile);
 }
 
-void ParseExecuteCommand(char *command) {/*Parse the command into individual tokens*/
+/*Parse the command into individual tokens*/
+void ParseExecuteCommand(char *command)
+{
     char **cmdArgs = ParseCommand(command);
     if (*cmdArgs == NULL)
     {
-        PrintErrorMessage();
+        errorMessage();
         free(command);
         return;
     }
@@ -190,14 +165,14 @@ int main(int argc, char **argv)
      * Your initial shell path should contain one directory: `/bin'
      * */
     setenv("PATH",defaultPath,1);// add the current working directory  in the "PATH" environment variable to search for the filename specified.
-    
+
     // Parsing commands Interactive mode or Script Mode
     if (argc == 1)
         InteractiveMode();
     else if (argc == 2)
         BatchMode(argv[1]);
     else
-        PrintErrorMessage();
+        errorMessage();
 
     // Exit the Shell
     return SUCCESS;

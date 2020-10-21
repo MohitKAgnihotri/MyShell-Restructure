@@ -79,7 +79,7 @@ int ExecuteSingleSystemCommand(Command *cmd)
         /*Finally execute  the command using the arguments using the tokenizedCommands*/
         if (execvp(cmd->tokenizedCommands[0], cmd->tokenizedCommands) == -1)
         {
-            PrintErrorMessage();
+            errorMessage();
             exit(EXIT_FAILURE);
         }
 
@@ -91,7 +91,7 @@ int ExecuteSingleSystemCommand(Command *cmd)
     else if (pid < 0)
     {
         //Forking Error
-        PrintErrorMessage();
+        errorMessage();
     }
     else
     {
@@ -141,7 +141,7 @@ int ExecuteMultipleCommandWithPipe(ParallelCommands *cmdList)
 
                 // Start command
                 execvp(cmdList->pCommand[i].tokenizedCommands[0], cmdList->pCommand[i].tokenizedCommands);
-                PrintErrorMessage();
+                errorMessage();
                 exit(1);
             }
 
@@ -161,6 +161,6 @@ int ExecuteMultipleCommandWithPipe(ParallelCommands *cmdList)
 
         // Start last command
         execvp(cmdList->pCommand[i].tokenizedCommands[0], cmdList->pCommand[i].tokenizedCommands);
-        PrintErrorMessage();
+    errorMessage();
         exit(1);
 }

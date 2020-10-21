@@ -36,7 +36,11 @@ char** ParseCommand(char *line);
 void ExtractCommandInformation(ParallelCommands *cmdList);
 void derivefullpath(char *fullpath, const char *shortpath);
 void CreateParallelCommands(char**args, ParallelCommands *cmdList);
-void PrintErrorMessage(void);
+void errorMessage(void);
 void FreeCommandList(ParallelCommands *cmdList);
+
+void getUsername(char*username, int size);
+void getHostname(char *hostname, int size);
+int getCurWorkDir(char *path, int size);
 
 #endif //MYSHELL_UTILITIES_H
